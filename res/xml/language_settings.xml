@@ -55,6 +55,13 @@
                 android:title="@string/ime_switcher_notify"
                 android:summary="@string/ime_switcher_notify_summary"
                 android:defaultValue="true" />
+
+        <SwitchPreference
+            android:key="fullscreen_keyboard"
+            android:title="@string/disable_fullscreen_keyboard_title"
+            android:summary="@string/disable_fullscreen_keyboard_summary"
+            android:defaultValue="false" />
+
     </PreferenceCategory>
 
     <!-- Temporarily disabled: -->

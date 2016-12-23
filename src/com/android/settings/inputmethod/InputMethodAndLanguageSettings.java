@@ -34,6 +34,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.LocaleList;
 import android.provider.Settings;
+import android.provider.Settings.SettingNotFoundException;
 import android.provider.Settings.System;
 import android.speech.tts.TtsEngines;
 import android.support.v14.preference.SwitchPreference;
@@ -44,6 +45,7 @@ import android.support.v7.preference.PreferenceCategory;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.preference.PreferenceScreen;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.InputDevice;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -89,8 +91,11 @@ public class InputMethodAndLanguageSettings extends SettingsPreferenceFragment
     private static final String KEY_INPUT_METHOD_SELECTOR = "input_method_selector";
     private static final String KEY_USER_DICTIONARY_SETTINGS = "key_user_dictionary_settings";
     private static final String KEY_PREVIOUSLY_ENABLED_SUBTYPES = "previously_enabled_subtypes";
+    private static final String TAG = "KeyboardInputSettings";
     // false: on ICS or later
     private static final boolean SHOW_INPUT_METHOD_SWITCHER_SETTINGS = false;
+
+    private static final String PREF_FULLSCREEN_KEYBOARD = "fullscreen_keyboard";
 
     private int mDefaultInputMethodSelectorVisibility = 0;
     private ListPreference mShowInputMethodSelectorPref;
@@ -106,6 +111,7 @@ public class InputMethodAndLanguageSettings extends SettingsPreferenceFragment
     private Handler mHandler;
     private SettingsObserver mSettingsObserver;
     private Intent mIntentWaitingForResult;
+    private SwitchPreference mFullscreenKeyboard;
     private InputMethodSettingValuesWrapper mInputMethodSettingValues;
     private DevicePolicyManager mDpm;
 
@@ -119,6 +125,11 @@ public class InputMethodAndLanguageSettings extends SettingsPreferenceFragment
         super.onCreate(icicle);
 
         addPreferencesFromResource(R.xml.language_settings);
+
+        mFullscreenKeyboard = (SwitchPreference) findPreference(PREF_FULLSCREEN_KEYBOARD);
+        mFullscreenKeyboard.setChecked(Settings.System.getInt(getActivity().getContentResolver(),
+                Settings.System.FULLSCREEN_KEYBOARD, 0) == 1);
+
 
         final Activity activity = getActivity();
         mImm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -343,6 +354,11 @@ public class InputMethodAndLanguageSettings extends SettingsPreferenceFragment
                         getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.showInputMethodPicker(false /* showAuxiliarySubtypes */);
             }
+        } else if (preference == mFullscreenKeyboard) {
+            boolean checked = ((SwitchPreference) preference).isChecked();
+            Settings.System.putInt(getActivity().getContentResolver(),
+                    Settings.System.FULLSCREEN_KEYBOARD, checked ? 1 : 0);
+            return true;
         } else if (preference instanceof SwitchPreference) {
             final SwitchPreference pref = (SwitchPreference) preference;
             if (pref == mGameControllerCategory.findPreference("vibrate_input_devices")) {
